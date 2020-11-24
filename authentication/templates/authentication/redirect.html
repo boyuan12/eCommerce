@@ -1,0 +1,13 @@
+{% extends "authentication/base.html" %}
+
+{% block title %}
+    Redirect...
+{% endblock %}
+
+{% block main %}
+    <script>
+        var deviceId = "{{ auth_device_id }}";
+        document.cookie = `authdeviceid=${deviceId}`;
+        location.assign("{{ route }}");
+    </script>
+{% endblock %}

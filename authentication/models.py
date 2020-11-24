@@ -1,4 +1,5 @@
 from django.db import models
+import uuid
 
 # Create your models here.
 class TwoFAToken(models.Model):
@@ -11,3 +12,7 @@ class TWOFAVerified(models.Model):
     user_id = models.IntegerField()
     phone = models.CharField(max_length=20)
 
+
+class AuthorizedDevice(models.Model):
+    user_id = models.IntegerField()
+    uuid = models.UUIDField(default=uuid.uuid4, unique=True)
