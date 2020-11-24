@@ -1,0 +1,16 @@
+{% extends "authentication/base.html" %}
+
+{% block title %}
+    2FA
+{% endblock %}
+
+{% block main %}
+    <h1>2FA Verify</h1>
+    <form method="POST">
+        {% csrf_token %}
+        <div>
+            <input type="text" name="code" class="form-control" placeholder="2FA Code">
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+{% endblock %}
