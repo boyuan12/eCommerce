@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.http import HttpResponse, HttpResponseRedirect
 from twilio.rest import Client
-from .models import AuthorizedDevice, TwoFAToken, TWOFAVerified
+from .models import AuthorizedDevice, Profile, TwoFAToken, TWOFAVerified
 from helpers import random_str
 import os
 
@@ -27,6 +27,11 @@ def register(request):
 
         User.objects.create_user(username=email, email=email, first_name=fname, last_name=lname, password=password).save()
         u = User.objects.get(username=email)
+        if role == "shopper":
+            role = 0
+        else:
+            role = 1
+        Profile(user_id=u.id, role=role).save()
 
         code = random_str()
         c.messages.create(from_='+19162800623', body='TWOFA Code: ' + code, to='+' + country_code + phone)
@@ -55,7 +60,12 @@ def login_view(request):
                     request.session["2fa_user_id"] = user.id
                     return HttpResponseRedirect("/auth/2fa/")
                 login(request, user)
-                return HttpResponse("logged in successfully")
+                p = Profile.objects.get(user_id=user.id)
+                if p.role == 0:
+                    return HttpResponseRedirect("/")
+                else:
+                    return HttpResponseRedirect("/seller/")
+                # return HttpResponse("logged in successfully")
             except:
                 return HttpResponse("Please complete initial 2FA first.")
 
@@ -117,5 +127,5 @@ def twofa_verify(request: HttpRequest):
         code = random_str()
         TwoFAToken(user_id=request.session.get("2fa_user_id"), code=code).save()
         phone = TWOFAVerified.objects.get(user_id=request.session.get("2fa_user_id")).phone
-        # c.messages.create(from_='+19162800623', body='TWOFA Code: ' + code, to=phone)
+        c.messages.create(from_='+19162800623', body='TWOFA Code: ' + code, to=phone)
         return render(request, "authentication/2fa.html")

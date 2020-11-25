@@ -16,3 +16,8 @@ class TWOFAVerified(models.Model):
 class AuthorizedDevice(models.Model):
     user_id = models.IntegerField()
     uuid = models.UUIDField(default=uuid.uuid4, unique=True)
+
+
+class Profile(models.Model):
+    user_id = models.IntegerField()
+    role = models.IntegerField() # 0: shopper, 1: seller
