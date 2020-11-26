@@ -7,3 +7,17 @@ class Shop(models.Model):
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=255)
     logo = models.CharField(max_length=255)
+    user_id = models.IntegerField()
+
+
+class Item(models.Model):
+    item_id = models.UUIDField(default=uuid.uuid4, unique=True)
+    name = models.CharField(max_length=100)
+    description = models.CharField(max_length=255)
+    price = models.FloatField()
+    shop_id = models.UUIDField()
+
+
+class ItemPicture(models.Model):
+    item_id = models.UUIDField(default=uuid.uuid4, unique=True)
+    img_url = models.CharField(max_length=255)

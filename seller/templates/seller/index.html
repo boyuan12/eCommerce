@@ -1,0 +1,24 @@
+{% extends "authentication/base.html" %}
+
+{% block title %}
+    Create New Shop
+{% endblock %}
+
+{% block main %}
+    <h1>Shops You Own</h1>
+    {% for s in shops %}
+        <div class="row">
+            <div class="card" style="width: 18rem;">
+                <img src="{{ s.logo }}" class="card-img-top" alt="{{ s.name }}">
+                <div class="card-body">
+                <h5 class="card-title">{{ s.name }}</h5>
+                <p class="card-text">{{ s.description }}</p>
+                </div>
+                <div class="card-body">
+                    <a href="/seller/shop/{{ s.shop_id }}" class="card-link">Views Items</a>
+                </div>
+            </div>
+        </div>
+
+    {% endfor %}
+{% endblock %}
