@@ -1,0 +1,30 @@
+{% extends "shopper/base.html" %}
+
+{% block title %}
+    Welcome to eCommerce!
+{% endblock %}
+
+{% block main %}
+    <h1>Results for "{{ q }}"</h1>
+    <ul>
+        {% for i in items %}
+            <div class="card mb-3" style="max-width: 540px;">
+                <div class="row no-gutters">
+                <div class="col-md-4">
+                    <img src="{{ i.0.img_url }}" class="card-img" alt="...">
+                </div>
+                <div class="col-md-8">
+                    <div class="card-body">
+                    <h5 class="card-title"><a href="/item/{{ i.1.item_id }}">{{ i.1.name }}</a></h5>
+                    <p class="card-text">{{ i.1.description }}</p>
+                    <p class="card-text"><small class="text-muted">${{ i.1.price }}</small></p>
+                    </div>
+                </div>
+                </div>
+            </div>
+        {% endfor %}
+    </ul>
+    {% if items.count == 0 %}
+        <h2>No results found, maybe try different one?</h2>
+    {% endif %}
+{% endblock %}
