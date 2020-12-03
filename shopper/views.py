@@ -1,17 +1,23 @@
 import datetime
 from django.shortcuts import render
 from seller.models import Item, ItemPicture
-from .models import PageView
+from .models import PageView, CartItem
 import requests
 import xmltodict
 import json
 from authentication.models import Profile
 import datetime
+import os
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+import json
+
+
 # from django.http import HttpRequest
 
 # Create your views here.
 
-USPS_USERNAME = "699DEVWI7317"
+USPS_USERNAME = os.getenv("USPS_USERNAME")
 
 # Create your views here.
 def usps_estimate_delivery(service, origin, destination):
@@ -98,4 +104,23 @@ def view_item(request, item_id):
         "est1": est1,
         "est2": est2
     })
+
+
+@csrf_exempt
+def add_cart(request):
+
+    post_data = json.loads(request.body.decode("utf-8"))
+    # https://stackoverflow.com/questions/61543829/django-taking-values-from-post-request-javascript-fetch-api
+
+    item_id = post_data["item_id"]
+    quantity = post_data["quantity"]
+    user_id = request.user.id
+
+    CartItem(item_id=item_id, user_id=user_id, quantity=quantity).save()
+
+    return JsonResponse({"code": 200})
+
+
+def cart(request):
+    pass
 
