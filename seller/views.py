@@ -5,6 +5,7 @@ import cloudinary.api
 import os
 from .models import Shop, Item, ItemPicture
 from django.http import HttpResponseRedirect, HttpResponse
+import requests
 
 
 cloudinary.config(
@@ -14,7 +15,6 @@ cloudinary.config(
 )
 
 
-# Create your views here.
 def index(request):
     shops = Shop.objects.filter(user_id=request.user.id)
     return render(request, "seller/index.html", {
@@ -40,7 +40,11 @@ def create_shop(request):
 
 def add_item(request, shop_id):
     if request.method == "POST":
-        Item(name=request.POST["name"], description=request.POST["description"], price=float(request.POST["price"]), shop_id=shop_id).save()
+        # USPS username: 699DEVWI7317
+        if request.POST.get("zip") == '':
+            Item(name=request.POST["name"], description=request.POST["description"], price=float(request.POST["price"]), shop_id=shop_id, zip=request.POST.get("zip"), usps_option=request.POST["usps"], shipping=request.POST["shipping"]).save()
+        else:
+            Item(name=request.POST["name"], description=request.POST["description"], price=float(request.POST["price"]), shop_id=shop_id, shipping=request.POST["shipping"], fastest_delivery=request.POST["fastest"], slowest_delivery=request.POST["slowest"]).save()
         item = Item.objects.filter(name=request.POST["name"], description=request.POST["description"], price=float(request.POST["price"]), shop_id=shop_id)[::-1][0]
 
         images = request.FILES.getlist('images')

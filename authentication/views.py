@@ -24,6 +24,13 @@ def register(request):
         password = request.POST["password"]
         role = request.POST["role"]
 
+        address = request.POST["address"]
+        address2 = request.POST.get("address2")
+        city = request.POST["city"]
+        state = request.POST["state"]
+        country = request.POST["country"]
+        zip = request.POST["zip"]
+
 
         User.objects.create_user(username=email, email=email, first_name=fname, last_name=lname, password=password).save()
         u = User.objects.get(username=email)
@@ -31,7 +38,7 @@ def register(request):
             role = 0
         else:
             role = 1
-        Profile(user_id=u.id, role=role).save()
+        Profile(user_id=u.id, role=role, address=address+" "+address2, city=city, state=state, country=country, zip=zip).save()
 
         code = random_str()
         c.messages.create(from_='+19162800623', body='TWOFA Code: ' + code, to='+' + country_code + phone)
@@ -65,6 +72,7 @@ def login_view(request):
                     return HttpResponseRedirect("/")
                 else:
                     return HttpResponseRedirect("/seller/")
+
                 # return HttpResponse("logged in successfully")
             except:
                 return HttpResponse("Please complete initial 2FA first.")

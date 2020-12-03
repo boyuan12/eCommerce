@@ -2,9 +2,25 @@ import datetime
 from django.shortcuts import render
 from seller.models import Item, ItemPicture
 from .models import PageView
+import requests
+import xmltodict
+import json
+from authentication.models import Profile
+import datetime
 # from django.http import HttpRequest
 
 # Create your views here.
+
+USPS_USERNAME = "699DEVWI7317"
+
+# Create your views here.
+def usps_estimate_delivery(service, origin, destination):
+    r = requests.get(f'https://secure.shippingapis.com/ShippingAPI.dll?API={service}&XML=<{service}Request USERID="{USPS_USERNAME}"> <OriginZip>{origin}</OriginZip> <DestinationZip>{destination}</DestinationZip> </{service}Request>')
+    data_dict = xmltodict.parse(r.text)
+    json_data = json.dumps(data_dict)
+    return json.loads(json_data)[service + "Response"]["Days"]
+
+
 def sort_item(queryset):
     results = {}
     for i in queryset:
@@ -13,7 +29,6 @@ def sort_item(queryset):
         except KeyError:
             results[i.item_id] = 1
     return results
-
 
 
 def index(request):
@@ -35,10 +50,12 @@ def index(request):
     else:
 
         current_hour = datetime.datetime.now().hour
+        current_date = datetime.datetime.now().day
 
         try:
-            PageView.objects.filter(timestamp__hour=str(current_hour-1)).delete()
-        except:
+            PageView.objects.exclude(timestamp__day=current_date, timestamp__hour=current_hour).delete()
+        except Exception as e:
+            print(e)
             PageView.objects.filter(timestamp__hour=str(current_hour)).delete()
 
         popular_items = []
@@ -59,10 +76,26 @@ def view_item(request, item_id):
     images = ItemPicture.objects.filter(item_id=item_id)
 
     PageView(item_id=item_id).save()
+    p = Profile.objects.get(user_id=request.user.id)
+
+    est = None
+    est1 = None
+    est2 = None
+
+    if item.zip != '' and p.country == "United States of America":
+        day = usps_estimate_delivery(item.usps_option, item.zip, p.zip)
+        est = datetime.datetime.now() + datetime.timedelta(int(day))
+
+    else:
+        est1 = datetime.datetime.now() + datetime.timedelta(int(item.fastest_delivery))
+        est2 = datetime.datetime.now() + datetime.timedelta(int(item.slowest_delivery))
 
     return render(request, "shopper/view-item.html", {
         "item": item,
         "image0": images[0],
-        "images": images[1:]
+        "images": images[1:],
+        "est": est,
+        "est1": est1,
+        "est2": est2
     })
 

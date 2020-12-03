@@ -16,6 +16,11 @@ class Item(models.Model):
     description = models.CharField(max_length=255)
     price = models.FloatField()
     shop_id = models.UUIDField()
+    zip = models.CharField(max_length=5, null=True)
+    usps_option = models.CharField(max_length=20, null=True)
+    fastest_delivery = models.CharField(max_length=25, null=True)
+    slowest_delivery = models.CharField(max_length=25, null=True)
+    shipping = models.FloatField()
 
 
 class ItemPicture(models.Model):
