@@ -1,0 +1,120 @@
+{% extends "shopper/base.html" %}
+
+{% block title %}
+    Cart
+{% endblock %}
+
+{% block main %}
+    <h1>Your Cart</h1>
+    <div class="row">
+        <div class="col-9">
+            {% for d in data %}
+                <div class="row">
+                    <div class="col-1">
+                        <input type="checkbox" id="{{ d.0.item_id }}-checkbox" checked onchange="itemChange('{{ d.0.item_id }}');" >
+                    </div>
+                    <div class="card mb-3" style="max-width: 540px;">
+                        <div class="row no-gutters">
+                        <div class="col-md-4">
+                            <img src="{{ d.2.img_url }}" class="card-img" alt="...">
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card-body">
+                                <h5 class="card-title"><a href="/item/{{ d.0.item_id }}">{{ d.0.name }}</a></h5>
+                                <p class="card-text">${{ d.0.price }} + ${{ d.0.shipping }}</p>
+                                <span id="{{ d.0.item_id }}-price" style="display: none;">{{ d.0.price }}</span>
+                                <span id="{{ d.0.item_id }}-shipping" style="display: none;">{{ d.0.shipping }}</span>
+                                <label for="quantity">Quantity</label>
+                                <select name="quantity" id="{{ d.0.item_id }}" onchange="quantityChange('{{ d.0.item_id }}');">
+                                  <option value="1">1</option>
+                                  <option value="2">2</option>
+                                  <option value="3">3</option>
+                                  <option value="4">4</option>
+                                  <option value="5">5</option>
+                                  <option value="6">6</option>
+                                  <option value="7">7</option>
+                                  <option value="8">8</option>
+                                  <option value="9">9</option>
+                                  <option value="10">10</option>
+                                </select>
+                                <button onclick="deleteItem('{{ d.0.item_id }}');">Delete From Cart</button>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="col-3">
+            <div class="card" style="width: 18rem;">
+                <div class="card-body">
+                  <h5 class="card-title">Total Price: $<span id="total">{{ price }}</span></h5>
+                  <button type="button" class="btn btn-success" id="buy">Buy Now</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var existingQuantity = {}
+    </script>
+
+    {% for d in data %}
+        <script>
+            existingQuantity["{{ d.0.item_id }}"] = parseInt("{{ d.1.quantity }}")
+            document.getElementById("{{ d.0.item_id }}")[parseInt("{{ d.1.quantity }}")-1].setAttribute("selected", "")
+        </script>
+    {% endfor %}
+
+    <script>
+        function quantityChange(item_id) {
+            var existingQ = existingQuantity[item_id]
+            var newQuantity = parseInt(document.getElementById(item_id).value);
+            existingQuantity[item_id] = newQuantity;
+            var unitPrice = parseFloat(document.getElementById(item_id + "-price").innerText);
+            var total = parseFloat(document.getElementById("total").innerText);
+            if (newQuantity < existingQ) {
+                total = total - unitPrice * (existingQ - newQuantity);
+            } else {
+                console.log(total, unitPrice, existingQ, newQuantity, total + unitPrice * (existingQ - newQuantity))
+                total = total + unitPrice * (newQuantity - existingQ);
+            }
+            console.log(newQuantity, existingQ, unitPrice, total)
+            document.getElementById("total").innerText = total.toFixed(2);
+        }
+
+        function itemChange(item_id) {
+            var total = parseFloat(document.getElementById("total").innerText);
+            var eq = existingQuantity[item_id];
+            var unitPrice = parseFloat(document.getElementById(item_id + "-price").innerText);
+            var shipping = parseFloat(document.getElementById(item_id + "-shipping").innerText);
+
+            if (!document.getElementById(item_id + "-checkbox").checked) {
+                document.getElementById(item_id).setAttribute("disabled", "");
+                total = total - eq * unitPrice - shipping
+            } else {
+                document.getElementById(item_id).removeAttribute("disabled");
+                total = total + eq * unitPrice + shipping
+            }
+
+            document.getElementById('total').innerText = total.toFixed(2)
+        }
+
+        
+        function deleteItem(item_id) {
+            fetch("http://127.0.0.1:8000/delete-cart/", {
+                method: "POST",
+                credentials: "same-origin",
+                body: JSON.stringify({item_id: item_id})
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data)
+            })
+
+            location.assign("/cart/")
+        }
+
+    </script>
+
+{% endblock %}

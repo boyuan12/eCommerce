@@ -80,6 +80,13 @@ def index(request):
 def view_item(request, item_id):
     item = Item.objects.get(item_id=item_id)
     images = ItemPicture.objects.filter(item_id=item_id)
+    in_cart = False
+
+    try:
+        CartItem.objects.get(item_id=item_id, user_id=request.user.id)
+        in_cart = True
+    except:
+        pass
 
     PageView(item_id=item_id).save()
     p = Profile.objects.get(user_id=request.user.id)
@@ -102,7 +109,8 @@ def view_item(request, item_id):
         "images": images[1:],
         "est": est,
         "est1": est1,
-        "est2": est2
+        "est2": est2,
+        "in_cart": in_cart
     })
 
 
@@ -122,5 +130,33 @@ def add_cart(request):
 
 
 def cart(request):
-    pass
+    data = []
+    items = CartItem.objects.filter(user_id=request.user.id)
+    price = 0
+
+    for i in items:
+        item = Item.objects.get(item_id=i.item_id)
+        pic = ItemPicture.objects.filter(item_id=i.item_id)[0]
+        data.append([item, i, pic])
+        print(i.quantity)
+        price += (item.price * i.quantity + item.shipping)
+
+    return render(request, "shopper/cart.html", {
+        "data": data,
+        "price": '%.2f' % round(price, 2)
+    })
+
+
+@csrf_exempt
+def delete_cart(request):
+
+    post_data = json.loads(request.body.decode("utf-8"))
+    # https://stackoverflow.com/questions/61543829/django-taking-values-from-post-request-javascript-fetch-api
+
+    item_id = post_data["item_id"]
+    user_id = request.user.id
+
+    CartItem.objects.get(item_id=item_id, user_id=user_id).delete()
+
+    return JsonResponse({"code": 200})
 
