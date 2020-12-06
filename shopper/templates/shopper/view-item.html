@@ -92,7 +92,7 @@
     var quantity = document.getElementById("quantity").value;
     var unitPrice = parseFloat("{{ item.price }}");
     var total = parseFloat(document.getElementById("total").innerText);
-  
+
     if (quantity > pastQuantity) {
       total = total + unitPrice * (quantity - pastQuantity);
     } else {
@@ -101,6 +101,10 @@
     document.getElementById("total").innerText = total.toFixed(2);
 
     pastQuantity = quantity;
+  }
+
+  document.getElementById("buy").onclick = () => {
+    location.assign(`/stripe/?item_id={{ item.item_id }}&quantity=${document.getElementById("quantity").value}`)
   }
 </script>
 {% endblock %}

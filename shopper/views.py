@@ -1,4 +1,5 @@
 import datetime
+from typing import Any, List
 from django.shortcuts import render
 from seller.models import Item, ItemPicture
 from .models import PageView, CartItem
@@ -9,8 +10,26 @@ from authentication.models import Profile
 import datetime
 import os
 from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect
 import json
+import stripe
+
+
+stripe.api_key = os.getenv("STRIPE_API_KEY")
+
+def calculate_order_amount(items):
+    """
+        items: [["item-id", quantity]]
+    """
+    price = 0
+    items = list(items)
+
+    for i in items:
+        item = Item.objects.get(item_id=i[0])
+        price += float(item.price) * float(i[1]) + float(item.shipping)
+
+    return int(price * 100)
+
 
 
 # from django.http import HttpRequest
@@ -160,3 +179,77 @@ def delete_cart(request):
 
     return JsonResponse({"code": 200})
 
+
+@csrf_exempt
+def modify_cart(request):
+
+    post_data = json.loads(request.body.decode("utf-8"))
+    item_id = post_data["item_id"]
+    user_id = request.user.id
+    quantity = post_data["quantity"]
+
+    c = CartItem.objects.get(user_id=user_id, item_id=item_id)
+    c.quantity = quantity
+    c.save()
+
+    return JsonResponse({"code": 200})
+
+
+@csrf_exempt
+def create_payment_intent(request):
+    data = json.loads(request.body.decode("utf-8"))
+
+    intent = stripe.PaymentIntent.create(
+        amount=calculate_order_amount(list(data)),
+        currency='usd'
+    )
+
+    return JsonResponse({
+        'clientSecret': intent['client_secret']
+    })
+
+
+def stripe_payment(request):
+    if request.GET.get("item_id") is None:
+        items = CartItem.objects.filter(user_id=request.user.id)
+        total = 0
+        data = []
+
+        for i in items:
+            unit_price = Item.objects.get(item_id=i.item_id).price
+            shipping = Item.objects.get(item_id=i.item_id).shipping
+            quantity = i.quantity
+
+            total += quantity * unit_price + shipping
+
+            data.append([Item.objects.get(item_id=i.item_id), i.quantity])
+
+
+    else:
+        if int(request.GET.get("quantity")) < 1:
+            return HttpResponseRedirect(f"/stripe/?item_id={request.GET.get('item_id')}&quantity=1")
+        elif int(request.GET.get("quantity")) > 10:
+            return HttpResponseRedirect(f"/stripe/?item_id={request.GET.get('item_id')}&quantity=10")
+
+        item = Item.objects.get(item_id=request.GET.get("item_id"))
+        data = [[item, request.GET.get("quantity")]]
+        total = int(request.GET.get("quantity")) * item.price + item.shipping
+
+
+    return render(request, "shopper/stripe.html", {
+        "total": '%.2f' % round(total, 2),
+        "data": data
+    })
+
+
+def get_all_cart_item(request):
+    if request.GET.get("item_id") == '' or request.GET.get("item_id") == None:
+        items = CartItem.objects.filter(user_id=request.user.id)
+        data = [[i.item_id, i.quantity] for i in items]
+
+    else:
+        item_id = request.GET["item_id"]
+        quantity = request.GET["quantity"]
+        data = [[item_id, quantity]]
+
+    return JsonResponse({"purchase": data})

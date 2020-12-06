@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script src="https://js.stripe.com/v3/"></script>
+{% load static %}
+<link rel="stylesheet" href="{% static 'shopper/stripe.css' %}">
+<script src="{% static 'shopper/stripe.js' %}"></script>
+
+<ul>
+    {% load multiply_extra %}
+    {% for d in data %}
+        <li>{{ d.0.name }} x{{ d.1 }} -> ${% multiply d.0.price d.1 %} + ${{ d.0.shipping }} shipping</li>
+    {% endfor %}
+</ul>
+<form id="payment-form">
+    <div id="card-element"><!--Stripe.js injects the Card Element--></div>
+    <button id="submit">
+        <div class="spinner hidden" id="spinner"></div>
+        <span id="button-text">Pay ${{ total }}</span>
+    </button>
+    <p id="card-error" role="alert"></p>
+    <p class="result-message hidden">
+        Payment succeeded, see the result in your
+        <a href="" target="_blank">Stripe dashboard.</a> Refresh the page to pay again.
+    </p>
+    </form>
+
+</body>
+</html>
+

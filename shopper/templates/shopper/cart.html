@@ -71,6 +71,12 @@
             var existingQ = existingQuantity[item_id]
             var newQuantity = parseInt(document.getElementById(item_id).value);
             existingQuantity[item_id] = newQuantity;
+
+            fetch("/modify-item/", {
+                method: "POST",
+                body: JSON.stringify({"item_id": item_id, "quantity": newQuantity})
+            })
+
             var unitPrice = parseFloat(document.getElementById(item_id + "-price").innerText);
             var total = parseFloat(document.getElementById("total").innerText);
             if (newQuantity < existingQ) {
@@ -100,7 +106,7 @@
             document.getElementById('total').innerText = total.toFixed(2)
         }
 
-        
+
         function deleteItem(item_id) {
             fetch("http://127.0.0.1:8000/delete-cart/", {
                 method: "POST",
@@ -114,6 +120,8 @@
 
             location.assign("/cart/")
         }
+
+
 
     </script>
 
