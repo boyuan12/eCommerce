@@ -1,0 +1,26 @@
+{% extends "shopper/base.html" %}
+
+{% block title %}
+    Order {{ payment_id }}
+{% endblock %}
+
+{% block main %}
+    <h1>Order {{ payment_id }}</h1>
+    {% for d in data %}
+    <div class="card mb-3" style="max-width: 540px;">
+        <div class="row no-gutters">
+        <div class="col-md-4">
+            <img src="{{ d.1 }}" class="card-img" alt="...">
+        </div>
+        <div class="col-md-8">
+            <div class="card-body">
+                <h5 class="card-title"><a href="/item/{{ d.0.item_id }}">{{ d.0.name }}</a></h5>
+                <p class="card-text">${{ d.0.price }} + ${{ d.0.shipping }}</p>
+                <p class="card-text">Quantity: {{ d.2 }}</p>
+            </div>
+        </div>
+        </div>
+    </div>
+    {% endfor %}
+    <h1>Total: </h1>
+{% endblock %}

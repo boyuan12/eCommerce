@@ -70,7 +70,7 @@ fetch(itemPurchaseUrl)
               // The payment succeeded!
               fetch("/payment-complete/", {
                 method: "POST",
-                body: JSON.stringify({"items": purchase, "id": result.paymentIntent.id})
+                body: JSON.stringify({"items": purchase, "id": result.paymentIntent.id, "info": location.search})
               })
               orderComplete(result.paymentIntent.id);
             }

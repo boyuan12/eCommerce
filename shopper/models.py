@@ -12,5 +12,18 @@ class CartItem(models.Model):
     user_id = models.IntegerField()
     quantity = models.IntegerField()
 
-    def total(self):
-        return self.quantity * Item.objects.get(item_id=self.item_id).price
+
+class Order(models.Model):
+    payment_id = models.CharField(max_length=100)
+    user_id = models.IntegerField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+
+class OrderItem(models.Model):
+    item_id = models.UUIDField()
+    quantity = models.IntegerField()
+    payment_id = models.CharField(max_length=100)
+    order_status = models.IntegerField() # 0: waiting to be shipped, 1: shipped, 2: arrived
+    tracking_number = models.CharField(max_length=100, null=True)
+    shipping_company = models.CharField(max_length=100, null=True)
+    website = models.CharField(max_length=255, null=True)

@@ -2,7 +2,7 @@ import datetime
 from typing import Any, List
 from django.shortcuts import render
 from seller.models import Item, ItemPicture
-from .models import PageView, CartItem
+from .models import PageView, CartItem, Order, OrderItem
 import requests
 import xmltodict
 import json
@@ -253,3 +253,43 @@ def get_all_cart_item(request):
         data = [[item_id, quantity]]
 
     return JsonResponse({"purchase": data})
+
+
+@csrf_exempt
+def payment_complete(request):
+    data = json.loads(request.body.decode("utf-8"))
+
+    if data["info"] == '':
+        CartItem.objects.filter(user_id=request.user.id).delete()
+
+    Order(payment_id=data["id"], user_id=request.user.id).save()
+    order = Order.objects.get(payment_id=data["id"])
+
+    for i in data["items"]:
+        OrderItem(item_id=i[0], quantity=i[1], payment_id=data["id"], order_status=0).save()
+
+    # send email to notify users
+    return JsonResponse({"code": 200})
+
+
+def order_display(request):
+    orders = Order.objects.filter(user_id=request.user.id)
+    return render(request, "shopper/orders.html", {
+        "orders": orders
+    })
+
+
+def order_detail(request, payment_id):
+    order = Order.objects.get(payment_id=payment_id, user_id=request.user.id)
+    items = OrderItem.objects.filter(payment_id=payment_id)
+    data = [] # [[Item, img, quantity]]
+
+    for i in items:
+        item = Item.objects.get(item_id=i.item_id)
+        pic = ItemPicture.objects.filter(item_id=i.item_id)[0].img_url
+        data.append([item, pic, i.quantity])
+
+    return render(request, "shopper/order.html", {
+        "data": data,
+        "payment_id": payment_id
+    })

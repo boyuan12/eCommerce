@@ -1,0 +1,14 @@
+{% extends "shopper/base.html" %}
+
+{% block title %}
+    Orders
+{% endblock %}
+
+{% block main %}
+    <h1>Orders</h1>
+    <ul>
+        {% for order in orders %}
+            <li>{{ order.payment_id }} on {{ order.timestamp }}</li>
+        {% endfor %}
+    </ul>
+{% endblock %}
