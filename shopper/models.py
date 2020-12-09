@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.db import models
 from seller.models import Item
 
@@ -28,3 +29,10 @@ class OrderItem(models.Model):
     shipping_company = models.CharField(max_length=100, null=True)
     website = models.CharField(max_length=255, null=True)
 
+
+class Comment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    item_id = models.UUIDField()
+    rating = models.IntegerField()
+    comment = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)

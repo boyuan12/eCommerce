@@ -2,7 +2,7 @@ import datetime
 from typing import Any, List
 from django.shortcuts import render
 from seller.models import Item, ItemPicture
-from .models import PageView, CartItem, Order, OrderItem
+from .models import PageView, CartItem, Order, OrderItem, Comment
 import requests
 import xmltodict
 import json
@@ -97,40 +97,53 @@ def index(request):
 
 
 def view_item(request, item_id):
-    item = Item.objects.get(item_id=item_id)
-    images = ItemPicture.objects.filter(item_id=item_id)
-    in_cart = False
+    if request.method == "POST":
+        comment = request.POST["comments"]
+        rating = request.POST["rating"]
 
-    try:
-        CartItem.objects.get(item_id=item_id, user_id=request.user.id)
-        in_cart = True
-    except:
-        pass
+        Comment(user=request.user, item_id=item_id, rating=int(rating), comment=comment).save()
+        c = Comment.objects.get(user=request.user, item_id=item_id, rating=int(rating), comment=comment)
 
-    PageView(item_id=item_id).save()
-    p = Profile.objects.get(user_id=request.user.id)
-
-    est = None
-    est1 = None
-    est2 = None
-
-    if item.zip != '' and p.country == "United States of America":
-        day = usps_estimate_delivery(item.usps_option, item.zip, p.zip)
-        est = datetime.datetime.now() + datetime.timedelta(int(day))
+        return HttpResponseRedirect(f"/item/{item_id}/#{c.id}")
 
     else:
-        est1 = datetime.datetime.now() + datetime.timedelta(int(item.fastest_delivery))
-        est2 = datetime.datetime.now() + datetime.timedelta(int(item.slowest_delivery))
+        item = Item.objects.get(item_id=item_id)
+        images = ItemPicture.objects.filter(item_id=item_id)
+        in_cart = False
 
-    return render(request, "shopper/view-item.html", {
-        "item": item,
-        "image0": images[0],
-        "images": images[1:],
-        "est": est,
-        "est1": est1,
-        "est2": est2,
-        "in_cart": in_cart
-    })
+        try:
+            CartItem.objects.get(item_id=item_id, user_id=request.user.id)
+            in_cart = True
+        except:
+            pass
+
+        PageView(item_id=item_id).save()
+        p = Profile.objects.get(user_id=request.user.id)
+
+        est = None
+        est1 = None
+        est2 = None
+
+        if item.zip != '' and p.country == "United States of America":
+            day = usps_estimate_delivery(item.usps_option, item.zip, p.zip)
+            est = datetime.datetime.now() + datetime.timedelta(int(day))
+
+        else:
+            est1 = datetime.datetime.now() + datetime.timedelta(int(item.fastest_delivery))
+            est2 = datetime.datetime.now() + datetime.timedelta(int(item.slowest_delivery))
+
+        comments = Comment.objects.filter(item_id=item_id)
+
+        return render(request, "shopper/view-item.html", {
+            "item": item,
+            "image0": images[0],
+            "images": images[1:],
+            "est": est,
+            "est1": est1,
+            "est2": est2,
+            "in_cart": in_cart,
+            "comments": comments
+        })
 
 
 @csrf_exempt
