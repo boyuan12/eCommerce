@@ -1,3 +1,5 @@
+from json.decoder import JSONDecodeError
+from django.http.response import JsonResponse
 from django.shortcuts import render
 import cloudinary
 import cloudinary.uploader
@@ -6,7 +8,8 @@ import os
 from .models import Shop, Item, ItemPicture
 from django.http import HttpResponseRedirect, HttpResponse
 import requests
-
+from shopper.models import Order, OrderItem
+from authentication.models import Profile
 
 cloudinary.config(
     cloud_name="boyuan12",
@@ -68,4 +71,55 @@ def view_item(request, shop_id, item_id):
         "item": item,
         "image0": images[0],
         "images": images[1:]
+    })
+
+
+def view_shop(request, shop_id):
+    items = Item.objects.filter(shop_id=shop_id)
+    data = []
+
+    for item in items:
+        order = OrderItem.objects.filter(item_id=item.item_id, order_status=0)
+        if len(order) != 0:
+            data.append([o for o in order])
+
+    print(data)
+
+    return render(request, "seller/shop.html", {
+        "data": data,
+        "data_length": len(data)
+    })
+
+
+def view_orders(request, shop_id):
+    items = Item.objects.filter(shop_id=shop_id)
+    data = []
+
+    for item in items:
+        order = OrderItem.objects.filter(item_id=item.item_id, order_status=0)
+        if len(order) != 0:
+            data.append([o for o in order])
+
+    print(data)
+
+    return render(request, "seller/orders.html", {
+        "data": data,
+        "data_length": len(data)
+    })
+
+
+
+def view_order(request, shop_id, order_item):
+    order_item_2 = OrderItem.objects.get(id=order_item)
+    order = Order.objects.get(payment_id=order_item_2.payment_id)
+    profile = Profile.objects.get(user_id=order.user_id)
+    item = Item.objects.get(item_id=order_item_2.item_id)
+
+    print(order_item_2, order, profile)
+
+    return render(request, "seller/order.html", {
+        "order_item": order_item_2,
+        "order": order,
+        "profile": profile,
+        "item": item
     })

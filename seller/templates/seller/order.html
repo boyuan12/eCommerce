@@ -1,0 +1,14 @@
+{% extends "authentication/base.html" %}
+
+{% block title %}
+    Order
+{% endblock %}
+
+{% block main %}
+    <h1>Shop</h1>
+
+    <p>{{ item.name }} x{{ order_item.quantity }}</p>
+    <p>Address Label: {{ profile.name }} {{ profile.address }}</p>
+
+{% endblock %}
+

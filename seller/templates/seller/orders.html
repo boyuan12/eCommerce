@@ -1,0 +1,17 @@
+{% extends "authentication/base.html" %}
+
+{% block title %}
+    Create New Shop
+{% endblock %}
+
+{% block main %}
+    <h1>Shop</h1>
+
+    {% for d in data %}
+        {% for i in d %}
+            <p><a href="{{ i.id }}">{{ i.item_id }} - {{ i.name }} x{{ i.quantity }}</a></p>
+        {% endfor %}
+    {% endfor %}
+
+{% endblock %}
+

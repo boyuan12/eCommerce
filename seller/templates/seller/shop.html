@@ -1,0 +1,16 @@
+{% extends "authentication/base.html" %}
+
+{% block title %}
+    Create New Shop
+{% endblock %}
+
+{% block main %}
+    <h1>Shop</h1>
+
+
+    {% if data_length == 0 %}
+        <p>No orders waiting to respond.</p>
+    {% else %}
+        <p>There are active orders for you to respond </p>
+    {% endif %}
+{% endblock %}
