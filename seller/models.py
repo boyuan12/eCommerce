@@ -26,4 +26,3 @@ class Item(models.Model):
 class ItemPicture(models.Model):
     item_id = models.UUIDField(default=uuid.uuid4)
     img_url = models.CharField(max_length=255)
-

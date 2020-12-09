@@ -27,3 +27,4 @@ class OrderItem(models.Model):
     tracking_number = models.CharField(max_length=100, null=True)
     shipping_company = models.CharField(max_length=100, null=True)
     website = models.CharField(max_length=255, null=True)
+

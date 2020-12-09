@@ -10,6 +10,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 import requests
 from shopper.models import Order, OrderItem
 from authentication.models import Profile
+from django.contrib.auth.models import User
 
 cloudinary.config(
     cloud_name="boyuan12",
@@ -83,11 +84,15 @@ def view_shop(request, shop_id):
         if len(order) != 0:
             data.append([o for o in order])
 
-    print(data)
+    items_data = []
+    for item in items:
+        img = ItemPicture.objects.filter(item_id=item.item_id)[0]
+        items_data.append([item, img])
 
     return render(request, "seller/shop.html", {
         "data": data,
-        "data_length": len(data)
+        "data_length": len(data),
+        "items": items_data
     })
 
 
@@ -110,16 +115,33 @@ def view_orders(request, shop_id):
 
 
 def view_order(request, shop_id, order_item):
-    order_item_2 = OrderItem.objects.get(id=order_item)
-    order = Order.objects.get(payment_id=order_item_2.payment_id)
-    profile = Profile.objects.get(user_id=order.user_id)
-    item = Item.objects.get(item_id=order_item_2.item_id)
+    if request.method == "POST":
+        tracking_number = request.POST["tracking-number"]
+        shipping_company = request.POST["shipping-company"]
+        website = request.POST["website"]
+        order_item_2 = OrderItem.objects.get(id=order_item)
 
-    print(order_item_2, order, profile)
+        order_item_2.tracking_number = tracking_number
+        order_item_2.shipping_company = shipping_company
+        order_item_2.website = website
+        order_item_2.order_status = 1
+        order_item_2.save()
 
-    return render(request, "seller/order.html", {
-        "order_item": order_item_2,
-        "order": order,
-        "profile": profile,
-        "item": item
-    })
+        return HttpResponseRedirect(f"/seller/shop/{shop_id}/orders/{order_item}")
+
+    else:
+        order_item_2 = OrderItem.objects.get(id=order_item)
+        order = Order.objects.get(payment_id=order_item_2.payment_id)
+        user = User.objects.get(id=order.user_id)
+        profile = Profile.objects.get(user_id=order.user_id)
+        item = Item.objects.get(item_id=order_item_2.item_id)
+
+
+        return render(request, "seller/order.html", {
+            "order_item": order_item_2,
+            "order": order,
+            "profile": profile,
+            "item": item,
+            "user": user
+        })
+

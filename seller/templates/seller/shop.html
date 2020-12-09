@@ -11,6 +11,20 @@
     {% if data_length == 0 %}
         <p>No orders waiting to respond.</p>
     {% else %}
-        <p>There are active orders for you to respond </p>
+        <p><a href="orders">There are active orders for you to respond</a></p>
     {% endif %}
+
+    <h2>Items</h2>
+    <div class="row">
+        {% for item in items %}
+            <div class="card" style="width: 18rem;">
+                <img src="{{ item.1.img_url }}" class="card-img-top" alt="{{ item.0.name }}">
+                <div class="card-body">
+                <h5 class="card-title">{{ item.0.name }}</h5>
+                <p class="card-text">{{ item.0.description }}</p>
+                <p class="card-text">${{ item.0.price }}</p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
 {% endblock %}

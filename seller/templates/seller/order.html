@@ -8,7 +8,21 @@
     <h1>Shop</h1>
 
     <p>{{ item.name }} x{{ order_item.quantity }}</p>
-    <p>Address Label: {{ profile.name }} {{ profile.address }}</p>
+    <p>Address Label: {{ user.first_name }} {{ profile.address }}, {{ profile.city }} {{ profile.state }} {{ profile.zip }}, {{ profile.country }}</p>
 
+    <form method="POST">
+        {% csrf_token %}
+        {% if order_item.tracking_number == None %}
+            <input type="text" class="form-control" placeholder="Tracking Number" name="tracking-number">
+            <input type="text" class="form-control" placeholder="Shipping Company" name="shipping-company">
+            <input type="text" class="form-control" placeholder="Shipping Tracking Website" name="website">
+            <button type="submit" class="btn btn-primary">Modify (YOU CAN'T CHANGE ONCE SUBMITTED)</button>
+        {% else %}
+            <input type="text" class="form-control" placeholder="Tracking Number" name="tracking-number" value="{{ order_item.tracking_number }}" disabled>
+            <input type="text" class="form-control" placeholder="Shipping Company" name="shipping-company" value="{{ order_item.shipping_company }}" disabled>
+            <input type="text" class="form-control" placeholder="Shipping Tracking Website" name="website" value="{{ order_item.website }}" disabled>
+        {% endif %}
+        
+    </form>
 {% endblock %}
 

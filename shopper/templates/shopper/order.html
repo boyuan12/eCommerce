@@ -7,20 +7,24 @@
 {% block main %}
     <h1>Order {{ payment_id }}</h1>
     {% for d in data %}
-    <div class="card mb-3" style="max-width: 540px;">
-        <div class="row no-gutters">
-        <div class="col-md-4">
-            <img src="{{ d.1 }}" class="card-img" alt="...">
-        </div>
-        <div class="col-md-8">
-            <div class="card-body">
-                <h5 class="card-title"><a href="/item/{{ d.0.item_id }}">{{ d.0.name }}</a></h5>
-                <p class="card-text">${{ d.0.price }} + ${{ d.0.shipping }}</p>
-                <p class="card-text">Quantity: {{ d.2 }}</p>
+        <div class="card mb-3" style="max-width: 540px;">
+            <div class="row no-gutters">
+            <div class="col-md-4">
+                <img src="{{ d.1 }}" class="card-img" alt="...">
+            </div>
+            <div class="col-md-8">
+                <div class="card-body">
+                    <h5 class="card-title"><a href="/item/{{ d.0.item_id }}">{{ d.0.name }}</a></h5>
+                    <p class="card-text">${{ d.0.price }} + ${{ d.0.shipping }}</p>
+                    <p class="card-text">Quantity: {{ d.2 }}</p>
+                    {% if d.3.order_status == 0 %}
+                        <p class="card-text">Status: Order processed, waiting to be shipped</p>
+                    {% elif d.3.order_status == 1 %}
+                        <p class="card-text">Shipped by <a href="{{ d.3.website }}">{{ d.3.shipping_company }}: {{ d.3.tracking_number }}</a></p>
+                    {% endif %}
+                </div>
+            </div>
             </div>
         </div>
-        </div>
-    </div>
     {% endfor %}
-    <h1>Total: </h1>
 {% endblock %}

@@ -282,12 +282,12 @@ def order_display(request):
 def order_detail(request, payment_id):
     order = Order.objects.get(payment_id=payment_id, user_id=request.user.id)
     items = OrderItem.objects.filter(payment_id=payment_id)
-    data = [] # [[Item, img, quantity]]
+    data = [] # [[Item, img, quantity, OrderItem]]
 
     for i in items:
         item = Item.objects.get(item_id=i.item_id)
         pic = ItemPicture.objects.filter(item_id=i.item_id)[0].img_url
-        data.append([item, pic, i.quantity])
+        data.append([item, pic, i.quantity, i])
 
     return render(request, "shopper/order.html", {
         "data": data,
