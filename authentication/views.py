@@ -54,7 +54,7 @@ def login_view(request):
     if request.method == "POST":
         email = request.POST["email"]
         password = request.POST["password"]
-        auth_device_id = request.POST["auth-device-id"]
+        auth_device_id = request.POST.get("auth-device-id")
 
         user = authenticate(username=email, password=password)
 
