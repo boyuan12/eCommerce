@@ -11,6 +11,7 @@ class AuthenticationTestCase(TestCase):
         Profile(user_id=user.id, role=0, address="", city="", state="", country="", zip="").save()
         self.client = Client()
 
+
     def register(self):
         rv = self.client.post("/auth/register/", {
             "first-name": "",
@@ -31,7 +32,6 @@ class AuthenticationTestCase(TestCase):
 
 
     def login(self, email, password):
-        print(User.objects.all())
         rv = self.client.post("/auth/login/", {
             "email": email,
             "password": password
