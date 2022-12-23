@@ -6,7 +6,6 @@ urlpatterns = [
     path("create-shop/", views.create_shop),
     path("delete-item/", views.delete_item),
     path("stripe-conn/onboard-user/", views.onboard_user),
-    path("stripe-conn/onboard-user/refresh/", views.onboard_user_refresh),
     path("stripe-conn/finish-onboarding/", views.stripe_conn_finish_onboarding),
     path("stripe-conn/", views.stripe_conn),
     path("payout/", views.payout),
