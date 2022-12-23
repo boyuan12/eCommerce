@@ -1,0 +1,18 @@
+{% extends "authentication/base.html" %}
+
+{% block title %}
+    Payout
+{% endblock %}
+
+{% block main %}
+    <h1>Payout</h1>
+    <h3>Merchandise total: ${{ total_merchandise }}</h3>
+    <h3>Shipping Total: ${{ total_shipping }}</h3>
+    <h3>Charge Fee: {{ platform_fee }}</h3>
+    <h3>Total Available to Withdraw: {{ total_available }}</h3>
+
+    <form method="post">
+        <button type="submit" class="btn btn-primary">Request Payout!</button>
+    </form>
+{% endblock %}
+

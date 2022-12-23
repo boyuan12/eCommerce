@@ -186,53 +186,84 @@ def delete_item(request):
 @csrf_exempt
 def onboard_user(request):
     origin = request.META.get("HTTP_ORIGIN")
-
     try:
-        account = stripe.Account.create(type='standard')
+        sc = StripeConnected.objects.get(user_id=request.user.id)
+        return redirect("/seller/stripe-conn")
 
-        # Store the account ID.
-        request.session['account_id'] = account.id
-
-        account_link = stripe.AccountLink.create(
-            type='account_onboarding',
-            account=account.id,
-            refresh_url=f'{origin}/onboard-user/refresh',
-            return_url=f'{origin}',
-        )
-        print("HELLOO WORLD")
-        print(f'{origin}/seller/stripe-conn/finish-onboarding/')
-        print(account_link.url)
-        return redirect(account_link.url, code=303)
-    except Exception as e:
-        return JsonResponse(str(e), safe=False)
-
-
-def onboard_user_refresh(request):
-    if 'account_id' not in list(request.session.keys()):
-        return redirect('/')
-
-    account_id = request.session['account_id']
-
-    origin = ('https://' if request.is_secure else 'http://') + request.headers['host']
-
-    
-    try:
-
-        account_link = stripe.AccountLink.create(
-            type='account_onboarding',
-            account=account_id,
-            refresh_url=f'{origin}/seller/stripe-conn/onboard-user/refresh/',
-            return_url=f'{origin}/seller/stripe-conn/finish-onboarding/',
-        )
-        return redirect(account_link_url)
-    except Exception as e:
-        return JsonResponse(error=str(e)), 403
+    except:
+        return redirect(f"https://connect.stripe.com/express/oauth/v2/authorize?response_type=code&client_id=ca_IR3sv6l0BZhRMbdFUIxGaj6D7JPP6han&redirect_uri={origin}/seller/stripe-conn/finish-onboarding/")
 
 def stripe_conn(request):
-    return render(request, "seller/stripe-conn.html")
+    try:
+        sc = StripeConnected.objects.get(user_id=request.user.id)
+        return HttpResponse("Account connected successfully, go back to <a href='/seller/'>dashboard</a>")
+    except Exception as e:
+        return render(request, "seller/stripe-conn.html")
 
 def stripe_conn_finish_onboarding(request):
-    print(request.session["account_id"])
-    s = StripeConnected.objects.create(user_id=request.user.id, stripe_acct_id=request.session["account_id"])
-    print(s)
-    return JsonResponse({"success": True}), 200
+    code = request.GET.get("code")
+    response = stripe.OAuth.token(
+        grant_type='authorization_code',
+        code=code,
+    )
+
+    # Access the connected account id in the response
+    connected_account_id = response['stripe_user_id']
+
+    StripeConnected.objects.filter(user_id=request.user.id).delete()
+    StripeConnected.objects.create(user_id=request.user.id, stripe_acct_id=connected_account_id)
+
+    return redirect("/seller/stripe-conn/")
+
+@csrf_exempt
+def payout(request):
+    order_items = []
+    _items = []
+
+    total_merchandise = 0
+    total_shipping = 0
+    PLATFORM_FEE = 0.50
+    
+    shops = Shop.objects.filter(user_id=request.user.id)
+
+    for shop in shops:
+        items = Item.objects.filter(shop_id=shop.shop_id)
+        for item in items:
+            oi = OrderItem.objects.filter(item_id=item.item_id, is_payout=False)
+            for o in oi:
+                order_items.append(o)
+                _items.append(item)
+
+                total_merchandise += item.price
+                total_shipping += item.shipping
+    
+    total_available = total_merchandise * PLATFORM_FEE + total_shipping
+
+
+    if request.method == "POST":
+        try:
+            sc = StripeConnected.objects.get(user_id=request.user.id)
+        except:
+            return redirect("/seller/stripe-conn")
+
+        transfer = stripe.Transfer.create(
+            amount=int(total_available * 100),
+            currency="usd",
+            destination=sc.stripe_acct_id,
+        )
+        print(transfer)
+
+        for item in order_items:
+            item.is_payout = True
+            item.save()
+        
+    else:
+
+
+        return render(request, "seller/payout.html", {
+            "total_merchandise": str(round(total_merchandise, 2)),
+            "total_shipping": str(round(total_shipping, 2)),
+            "platform_fee": str(round(PLATFORM_FEE * 100, 2)) + "%",
+            "total_available": str(round(total_available, 2))
+        })
+
