@@ -191,7 +191,7 @@ def onboard_user(request):
         return redirect("/seller/stripe-conn")
 
     except:
-        return redirect(f"https://connect.stripe.com/express/oauth/v2/authorize?response_type=code&client_id=ca_IR3sv6l0BZhRMbdFUIxGaj6D7JPP6han&redirect_uri={origin}/seller/stripe-conn/finish-onboarding/")
+        return redirect(f"https://connect.stripe.com/express/oauth/v2/authorize?response_type=code&client_id=ca_IR3sv6l0BZhRMbdFUIxGaj6D7JPP6han&redirect_uri=http://ecommerce-python-django.herokuapp.com/seller/stripe-conn/finish-onboarding/")
 
 def stripe_conn(request):
     try:
