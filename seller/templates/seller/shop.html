@@ -14,8 +14,8 @@
     {% endif %}
 
     <h2>Items</h2>
+    <p><a href="add-item">Create an item</a></p><br>
     <div class="row">
-        <a href="add-item">Add a new item</a>
         {% for item in items %}
             <div class="card" style="width: 18rem;">
                 <img src="{{ item.1.img_url }}" class="card-img-top" alt="{{ item.0.name }}">
@@ -23,6 +23,7 @@
                 <h5 class="card-title">{{ item.0.name }}</h5>
                 <p class="card-text">{{ item.0.description }}</p>
                 <p class="card-text">${{ item.0.price }}</p>
+                <p class="card-text"><a href="/seller/delete-item?id={{ item.0.id }}">Delete This Item</a></p>
                 </div>
             </div>
         {% endfor %}

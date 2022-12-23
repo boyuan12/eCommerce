@@ -12,6 +12,7 @@ from shopper.models import Order, OrderItem
 from authentication.models import Profile
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect
 
 cloudinary.config(
     cloud_name="boyuan12",
@@ -45,8 +46,11 @@ def create_shop(request):
 
 @login_required(login_url='/auth/login')
 def add_item(request, shop_id):
+    shop = Shop.objects.get(shop_id=shop_id)
+    if shop.user_id != request.user.id:
+        return HttpResponse("403")
+
     if request.method == "POST":
-        # USPS username: 699DEVWI7317
         if request.POST.get("zip") != '':
             Item(name=request.POST["name"], description=request.POST["description"], price=float(request.POST["price"]), shop_id=shop_id, zip=request.POST.get("zip"), usps_option=request.POST["usps"], shipping=request.POST["shipping"]).save()
         else:
@@ -78,6 +82,10 @@ def view_item(request, shop_id, item_id):
 
 @login_required(login_url='/auth/login')
 def view_shop(request, shop_id):
+    shop = Shop.objects.get(shop_id=shop_id)
+    if shop.user_id != request.user.id:
+        return HttpResponse("403")
+
     items = Item.objects.filter(shop_id=shop_id)
     data = []
 
@@ -99,6 +107,10 @@ def view_shop(request, shop_id):
 
 @login_required(login_url='/auth/login')
 def view_orders(request, shop_id):
+    shop = Shop.objects.get(shop_id=shop_id)
+    if shop.user_id != request.user.id:
+        return HttpResponse("403")
+
     items = Item.objects.filter(shop_id=shop_id)
     data = []
 
@@ -117,6 +129,10 @@ def view_orders(request, shop_id):
 
 @login_required(login_url='/auth/login')
 def view_order(request, shop_id, order_item):
+    shop = Shop.objects.get(shop_id=shop_id)
+    if shop.user_id != request.user.id:
+        return HttpResponse("403")
+
     if request.method == "POST":
         tracking_number = request.POST["tracking-number"]
         shipping_company = request.POST["shipping-company"]
@@ -147,3 +163,15 @@ def view_order(request, shop_id, order_item):
             "user": user
         })
 
+@login_required(login_url='/auth/login')
+def delete_item(request):
+    id = request.GET.get("id")
+    item = Item.objects.get(id=id)
+    shop_id = item.shop_id
+    s = Shop.objects.get(shop_id=shop_id)
+
+    if s.user_id != request.user.id:
+        return HttpResponse("403")
+
+    item.delete()
+    return redirect("/seller")
