@@ -13,6 +13,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse, HttpResponseRedirect
 import json
 import stripe
+from django.contrib.auth.decorators import login_required
 
 
 stripe.api_key = os.getenv("STRIPE_API_KEY")
@@ -57,7 +58,7 @@ def sort_item(queryset):
             results[i.item_id] = 1
     return results
 
-
+@login_required(login_url='/auth/login')
 def index(request):
     if request.GET.get("q") is not None:
         query = request.GET.get("q")
@@ -93,14 +94,11 @@ def index(request):
             pic = ItemPicture.objects.filter(item_id=item.item_id)[0]
             popular_items.append([item, result[i], pic])
 
-        p = Profile.objects.get(user_id=request.user.id)
-        request.session["role"] = p.role
-
         return render(request, "shopper/index.html", {
             "popular": popular_items
         })
 
-
+@login_required(login_url='/auth/login')
 def view_item(request, item_id):
     if request.method == "POST":
         comment = request.POST["comments"]
@@ -151,7 +149,6 @@ def view_item(request, item_id):
             "comments": comments
         })
 
-
 @csrf_exempt
 def add_cart(request):
 
@@ -166,7 +163,7 @@ def add_cart(request):
 
     return JsonResponse({"code": 200})
 
-
+@login_required(login_url='/auth/login')
 def cart(request):
     data = []
     items = CartItem.objects.filter(user_id=request.user.id)
@@ -290,14 +287,14 @@ def payment_complete(request):
     # send email to notify users
     return JsonResponse({"code": 200})
 
-
+@login_required(login_url='/auth/login')
 def order_display(request):
     orders = Order.objects.filter(user_id=request.user.id)
     return render(request, "shopper/orders.html", {
         "orders": orders
     })
 
-
+@login_required(login_url='/auth/login')
 def order_detail(request, payment_id):
     order = Order.objects.get(payment_id=payment_id, user_id=request.user.id)
     items = OrderItem.objects.filter(payment_id=payment_id)

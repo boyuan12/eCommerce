@@ -19,13 +19,14 @@ cloudinary.config(
 )
 
 
+@login_required(login_url='/auth/login')
 def index(request):
     shops = Shop.objects.filter(user_id=request.user.id)
     return render(request, "seller/index.html", {
         "shops": shops
     })
 
-
+@login_required(login_url='/auth/login')
 def create_shop(request):
     if request.method == "POST":
         name = request.POST["name"]
@@ -41,7 +42,7 @@ def create_shop(request):
     else:
         return render(request, "seller/create-shop.html")
 
-
+@login_required(login_url='/auth/login')
 def add_item(request, shop_id):
     if request.method == "POST":
         # USPS username: 699DEVWI7317
@@ -61,7 +62,7 @@ def add_item(request, shop_id):
     else:
         return render(request, "seller/add-item.html")
 
-
+@login_required(login_url='/auth/login')
 def view_item(request, shop_id, item_id):
     shop = Shop.objects.get(shop_id=shop_id)
     item = Item.objects.get(item_id=item_id)
@@ -74,7 +75,7 @@ def view_item(request, shop_id, item_id):
         "images": images[1:]
     })
 
-
+@login_required(login_url='/auth/login')
 def view_shop(request, shop_id):
     items = Item.objects.filter(shop_id=shop_id)
     data = []
@@ -95,7 +96,7 @@ def view_shop(request, shop_id):
         "items": items_data
     })
 
-
+@login_required(login_url='/auth/login')
 def view_orders(request, shop_id):
     items = Item.objects.filter(shop_id=shop_id)
     data = []
@@ -113,7 +114,7 @@ def view_orders(request, shop_id):
     })
 
 
-
+@login_required(login_url='/auth/login')
 def view_order(request, shop_id, order_item):
     if request.method == "POST":
         tracking_number = request.POST["tracking-number"]
