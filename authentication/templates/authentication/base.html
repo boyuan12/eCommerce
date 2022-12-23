@@ -34,7 +34,7 @@
               <li class="nav-item active">
                 <a class="nav-link" href="/orders/">Orders <span class="sr-only">(current)</span></a>
               </li>
-            {% else %}
+            {% elif request.session.role == 1 %}
               <li class="nav-item active">
                 <a class="nav-link" href="/seller/">View Shops<span class="sr-only">(current)</span></a>
               </li>
