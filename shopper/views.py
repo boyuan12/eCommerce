@@ -43,6 +43,8 @@ def usps_estimate_delivery(service, origin, destination):
     r = requests.get(f'https://secure.shippingapis.com/ShippingAPI.dll?API={service}&XML=<{service}Request USERID="{USPS_USERNAME}"> <OriginZip>{origin}</OriginZip> <DestinationZip>{destination}</DestinationZip> </{service}Request>')
     data_dict = xmltodict.parse(r.text)
     json_data = json.dumps(data_dict)
+
+    print(json.loads(json_data))
     return json.loads(json_data)[service + "Response"]["Days"]
 
 
@@ -91,6 +93,9 @@ def index(request):
             pic = ItemPicture.objects.filter(item_id=item.item_id)[0]
             popular_items.append([item, result[i], pic])
 
+        p = Profile.objects.get(user_id=request.user.id)
+        request.session["role"] = p.role
+
         return render(request, "shopper/index.html", {
             "popular": popular_items
         })
@@ -124,7 +129,8 @@ def view_item(request, item_id):
         est1 = None
         est2 = None
 
-        if item.zip != '' and p.country == "United States of America":
+        if item.zip != None and p.country == "United States of America":
+            print(item.usps_option)
             day = usps_estimate_delivery(item.usps_option, item.zip, p.zip)
             est = datetime.datetime.now() + datetime.timedelta(int(day))
 

@@ -1,4 +1,4 @@
-var stripe = Stripe("pk_test_bTxFgsuYNXtTlQZ3GkG6k6BR00XF8mBMnO");
+var stripe = Stripe("pk_live_PNZQIpArgIb3c1XXju38cAEz002MuJhgTy");
 
 var itemPurchaseUrl = "/item-purchase/"
 

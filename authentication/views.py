@@ -44,7 +44,7 @@ def register(request):
         c.messages.create(from_='+19162800623', body='TWOFA Code: ' + code, to='+' + country_code + phone)
         TwoFAToken(user_id=u.id, code=code, phone='+' + country_code + phone).save()
 
-        return HttpResponse("registered successfully, please check your phone to complete 2FA")
+        return HttpResponse("registered successfully, please check your phone to <a href='/auth/2fa_verify/'>complete 2FA</a>")
 
     else:
         return render(request, "authentication/register.html")
@@ -68,6 +68,8 @@ def login_view(request):
                     return HttpResponseRedirect("/auth/2fa/")
                 login(request, user)
                 p = Profile.objects.get(user_id=user.id)
+                print(p.role)
+                request.session["role"] = p.role
                 if p.role == 0:
                     return HttpResponseRedirect("/")
                 else:
@@ -75,7 +77,7 @@ def login_view(request):
 
                 # return HttpResponse("logged in successfully")
             except:
-                return HttpResponse("Please complete initial 2FA first.")
+                return HttpResponse("Please complete  <a href='/auth/2fa_verify/'>initial 2FA</a> first.")
 
         else:
             return HttpResponse("You entered wrong credentials.")
@@ -111,7 +113,7 @@ def complete_2fa(request):
 
         TWOFAVerified(user_id=user_id, phone=phone).save()
 
-        return HttpResponse("2FA completed, please login")
+        return HttpResponse("2FA completed, please <a href='/auth/login'>login</a>")
     else:
         return render(request, "authentication/2fa.html")
 

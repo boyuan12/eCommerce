@@ -76,7 +76,7 @@
       var item_id = "{{ item.item_id }}"
       console.log(JSON.stringify({item_id: item_id, quantity: quantity}))
 
-      fetch("http://127.0.0.1:8000/add-cart/", {
+      fetch("/add-cart/", {
         method: "POST",
         credentials: "same-origin",
         body: JSON.stringify({item_id: item_id, quantity: quantity})

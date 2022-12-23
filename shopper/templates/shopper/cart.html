@@ -106,9 +106,8 @@
             document.getElementById('total').innerText = total.toFixed(2)
         }
 
-
         function deleteItem(item_id) {
-            fetch("http://127.0.0.1:8000/delete-cart/", {
+            fetch("/delete-cart/", {
                 method: "POST",
                 credentials: "same-origin",
                 body: JSON.stringify({item_id: item_id})
@@ -121,7 +120,9 @@
             location.assign("/cart/")
         }
 
-
+        document.getElementById("buy").onclick = () => {
+            location.assign(`/stripe/`)
+        }
 
     </script>
 
