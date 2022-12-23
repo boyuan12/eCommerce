@@ -172,6 +172,9 @@ def delete_item(request):
 
     if s.user_id != request.user.id:
         return HttpResponse("403")
+    
+    if len(OrderItem.objects.filter(item_id=item.item_id)) != 0:
+        return HttpResponse("You can't delete a merchandise until you shipped all active orders")
 
     item.delete()
     return redirect("/seller")
