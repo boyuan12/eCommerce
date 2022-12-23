@@ -90,7 +90,10 @@ def index(request):
         result = sort_item(PageView.objects.filter())
         print(result)
         for i in result:
-            item = Item.objects.get(item_id=i)
+            try:
+                item = Item.objects.get(item_id=i)
+            except Exception as e:
+                continue
             pic = ItemPicture.objects.filter(item_id=item.item_id)[0]
             popular_items.append([item, result[i], pic])
 
