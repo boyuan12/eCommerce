@@ -1,0 +1,28 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Stripe Sample Connect Onboarding for Standard accounts</title>
+    <meta name="description" content="Stripe Sample Connect Onboarding for Standard accounts" />
+
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="/static/seller/normalize.css" />
+    <link rel="stylesheet" href="/static/seller/global.css" />
+  </head>
+
+  <body>
+    <div class="sr-root">
+      <div class="sr-main">
+        <div class="sr-payment-summary payment-view">
+          <h1 class="order-amount">Setup payouts to eCommerce</h1>
+        </div>
+
+        <form action="/seller/stripe-conn/onboard-user/" method="POST">
+          <button type="submit">Setup payouts on Stripe</button>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>

@@ -5,7 +5,7 @@ import cloudinary
 import cloudinary.uploader
 import cloudinary.api
 import os
-from .models import Shop, Item, ItemPicture
+from .models import Shop, Item, ItemPicture, StripeConnected
 from django.http import HttpResponseRedirect, HttpResponse
 import requests
 from shopper.models import Order, OrderItem
@@ -13,6 +13,10 @@ from authentication.models import Profile
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
+import stripe
+from django.views.decorators.csrf import csrf_exempt
+
+stripe.api_key = os.getenv("STRIPE_API_KEY")
 
 cloudinary.config(
     cloud_name="boyuan12",
@@ -178,3 +182,57 @@ def delete_item(request):
 
     item.delete()
     return redirect("/seller")
+
+@csrf_exempt
+def onboard_user(request):
+    origin = request.META.get("HTTP_ORIGIN")
+
+    try:
+        account = stripe.Account.create(type='standard')
+
+        # Store the account ID.
+        request.session['account_id'] = account.id
+
+        account_link = stripe.AccountLink.create(
+            type='account_onboarding',
+            account=account.id,
+            refresh_url=f'{origin}/onboard-user/refresh',
+            return_url=f'{origin}',
+        )
+        print("HELLOO WORLD")
+        print(f'{origin}/seller/stripe-conn/finish-onboarding/')
+        print(account_link.url)
+        return redirect(account_link.url, code=303)
+    except Exception as e:
+        return JsonResponse(str(e), safe=False)
+
+
+def onboard_user_refresh(request):
+    if 'account_id' not in list(request.session.keys()):
+        return redirect('/')
+
+    account_id = request.session['account_id']
+
+    origin = ('https://' if request.is_secure else 'http://') + request.headers['host']
+
+    
+    try:
+
+        account_link = stripe.AccountLink.create(
+            type='account_onboarding',
+            account=account_id,
+            refresh_url=f'{origin}/seller/stripe-conn/onboard-user/refresh/',
+            return_url=f'{origin}/seller/stripe-conn/finish-onboarding/',
+        )
+        return redirect(account_link_url)
+    except Exception as e:
+        return JsonResponse(error=str(e)), 403
+
+def stripe_conn(request):
+    return render(request, "seller/stripe-conn.html")
+
+def stripe_conn_finish_onboarding(request):
+    print(request.session["account_id"])
+    s = StripeConnected.objects.create(user_id=request.user.id, stripe_acct_id=request.session["account_id"])
+    print(s)
+    return JsonResponse({"success": True}), 200

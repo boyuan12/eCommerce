@@ -13,5 +13,6 @@ urlpatterns = [
     path("create-payment-intent/", views.create_payment_intent),
     path("payment-complete/", views.payment_complete),
     path("orders/", views.order_display),
-    path("order/<str:payment_id>/", views.order_detail)
+    path("order/<str:payment_id>/", views.order_detail),
+    path("set-active-cart/", views.set_activeness_cart_item)
 ]

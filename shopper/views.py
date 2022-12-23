@@ -173,6 +173,8 @@ def cart(request):
     price = 0
 
     for i in items:
+        i.is_active = True
+        i.save()
         item = Item.objects.get(item_id=i.item_id)
         pic = ItemPicture.objects.filter(item_id=i.item_id)[0]
         data.append([item, i, pic])
@@ -230,7 +232,7 @@ def create_payment_intent(request):
 
 def stripe_payment(request):
     if request.GET.get("item_id") is None:
-        items = CartItem.objects.filter(user_id=request.user.id)
+        items = CartItem.objects.filter(user_id=request.user.id, is_active=True)
         total = 0
         data = []
 
@@ -312,3 +314,17 @@ def order_detail(request, payment_id):
         "data": data,
         "payment_id": payment_id
     })
+
+@csrf_exempt
+def set_activeness_cart_item(request):
+    json_data = json.loads(request.body)
+    ci = CartItem.objects.get(user_id=request.user.id, item_id=json_data["id"])
+
+    if json_data["enabled"]:
+        ci.is_active = True
+        ci.save()
+    else:
+        ci.is_active = False
+        ci.save()
+    
+    return JsonResponse({"success": True})

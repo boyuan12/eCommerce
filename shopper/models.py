@@ -12,6 +12,7 @@ class CartItem(models.Model):
     item_id = models.UUIDField()
     user_id = models.IntegerField()
     quantity = models.IntegerField()
+    is_active = models.BooleanField(default=True)
 
 
 class Order(models.Model):

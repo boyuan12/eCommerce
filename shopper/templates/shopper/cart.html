@@ -98,9 +98,18 @@
             if (!document.getElementById(item_id + "-checkbox").checked) {
                 document.getElementById(item_id).setAttribute("disabled", "");
                 total = total - eq * unitPrice - shipping
+
+                fetch("/set-active-cart/", {
+                    method: "POST",
+                    body: JSON.stringify({"id": item_id, "enabled": false})
+                })
             } else {
                 document.getElementById(item_id).removeAttribute("disabled");
                 total = total + eq * unitPrice + shipping
+                fetch("/set-active-cart/", {
+                    method: "POST",
+                    body: JSON.stringify({"id": item_id, "enabled": true})
+                })
             }
 
             document.getElementById('total').innerText = total.toFixed(2)
