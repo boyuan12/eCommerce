@@ -11,6 +11,7 @@ import requests
 from shopper.models import Order, OrderItem
 from authentication.models import Profile
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
 
 cloudinary.config(
     cloud_name="boyuan12",
